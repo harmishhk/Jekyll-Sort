@@ -13,24 +13,26 @@ module Jekyll
       if !config['jekyll_sort']
         return
       end
-      
+
       if !config['posts']
         postData = []
-        site.posts.each { |post| 
+        site.posts.each { |post|
           postHash = post.data
           postHash['url'] ||= post.url
           postHash['content'] ||= post.content
           postHash['date'] ||= post.date
+          postHash['update_date'] ||= post.data.has_key?('update_date') ?
+            Date.parse(post.data['update_date'].to_s) : Date.parse(post.date.to_s)
           postHash['tags'] ||= post.data.has_key?('tags') ? post.data['tags'] : []
           postHash['sort'] ||= post.data.has_key?('sort') ? post.data['sort'] : 0
           postData.push(postHash)
         }
         config['posts'] = postData
       end
-      
+
       if !config['pages']
         pageData = []
-        site.site_payload["site"]["pages"].each { |page| 
+        site.site_payload["site"]["pages"].each { |page|
           pageHash = page.data
           pageHash['url'] ||= page.url
           pageHash['content'] ||= page.content
@@ -44,11 +46,11 @@ module Jekyll
       sort_jobs = config['jekyll_sort']
       ans = []
       sort_jobs.each do |job|
-        
+
         # Filter by tags if necessary, use raw src if not
         if job.has_key?('include_tags')
           data = filter_by_tag(config[job['src']], job['include_tags'])
-        else 
+        else
           data = config[job['src']]
         end
 
@@ -70,7 +72,7 @@ module Jekyll
 
     # Filter content collection by the "include_tags" attribute on the config
     #   +content_collection+ an array of hashes
-    #   +tags+ an array of tags to filter by 
+    #   +tags+ an array of tags to filter by
     #
     # Returns a filtered collection by tag
     def filter_by_tag(content_collection, tags)
